@@ -12,11 +12,15 @@ app.use(express.json());
 // Route to handle form submissions
 app.post("/api/book-now", async (req, res) => {
   try {
-    const { name, contact, email, service, description } = req.body;
+    const { name, contact, email, service, description, dateTime } = req.body;
 
-    if (!name || !contact || !email || !service || !description) {
-      return res.status(400).json({ error: "All fields are required" });
+    if (!name || !contact || !email || !service || !description || !dateTime) {
+      return res.status(400).json({ success: false, error: "All fields including dateTime are required" });
     }
+
+    // Prepare a readable date/time string (simple, robust)
+    // datetime-local usually comes as "YYYY-MM-DDTHH:MM". We'll present it as "YYYY-MM-DD HH:MM"
+    const formattedDateTime = String(dateTime).replace("T", " ");
 
     // Configure Nodemailer transporter
     const transporter = nodemailer.createTransport({
@@ -27,7 +31,7 @@ app.post("/api/book-now", async (req, res) => {
       },
     });
 
-    // Email content
+    // Email content (includes date/time)
     const mailOptions = {
       from: `"Custom Mechanics Form" <${process.env.EMAIL_USER}>`,
       to: process.env.TO_EMAIL,
@@ -38,6 +42,7 @@ app.post("/api/book-now", async (req, res) => {
         <p><strong>Contact:</strong> ${contact}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Service:</strong> ${service}</p>
+        <p><strong>Preferred Date & Time:</strong> ${formattedDateTime}</p>
         <p><strong>Description:</strong></p>
         <p>${description}</p>
       `,
@@ -46,11 +51,11 @@ app.post("/api/book-now", async (req, res) => {
     // Send the email
     await transporter.sendMail(mailOptions);
 
-    console.log(`✅ Email sent from ${email} to ${process.env.TO_EMAIL}`);
-    res.status(200).json({ message: "Booking email sent successfully!" });
+    console.log(`✅ Email sent, booking from ${name}, preferred at ${formattedDateTime}`);
+    return res.status(200).json({ success: true, message: "Booking email sent successfully!" });
   } catch (error) {
     console.error("❌ Email sending failed:", error);
-    res.status(500).json({ error: "Failed to send email" });
+    return res.status(500).json({ success: false, error: "Failed to send email" });
   }
 });
 
