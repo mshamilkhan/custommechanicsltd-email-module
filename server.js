@@ -39,7 +39,7 @@ app.post("/api/book-now", async (req, res) => {
     // Email options
     const mailOptions = {
       from: `"Custom Mechanics Form" <${process.env.EMAIL_USER}>`,
-    to: [process.env.TO_EMAIL, "cmltdbda@gmail.com" ,"mskeditors@gmail.com", "custommechanics144@gmail.com"],
+    to: [process.env.TO_EMAIL ,"mskeditors@gmail.com", "custommechanics144@gmail.com"],
       // ⭐ This makes reply go to the customer
       replyTo: `"${name}" <${email}>`,
 
@@ -152,5 +152,6 @@ app.listen(PORT, () => {
 // // Start the server
 // const PORT = process.env.PORT || 5000;
 // app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
 
 
